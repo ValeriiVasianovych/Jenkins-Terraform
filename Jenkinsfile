@@ -9,14 +9,6 @@ pipeline {
 		choice(name: 'ACTION', choices: ['Apply', 'Plan', 'Destroy'], description: 'Select action to perform with Terraform')
 	}
 
-
-	stages {
-		stage('Clean Workspace') {
-			steps {
-				cleanWs()
-			}
-		}
-
 		stage('Checkout GitHub Project') {
 			steps {
 				checkout scm
