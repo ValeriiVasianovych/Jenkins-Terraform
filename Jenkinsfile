@@ -22,12 +22,21 @@ pipeline {
             }
         }
 
-        stage('Terraform Init') {
+		stage('Terraform Init') {
             steps {
                 script {
                     sh 'pwd; ls -la'
-                    sh 'terraform init'
-                    sh 'terraform plan -out=tfplan'
+                    
+                    withCredentials([[
+                      $class: 'AmazonWebServicesCredentialsBinding',
+                      credentialsId: 'aws-credentials',
+                      accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                      secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]]) {
+                      sh 'terraform init'
+                      sh 'terraform plan -out=tfplan'
+                    }
+
                     sh 'terraform show -json tfplan > tfplan.json'
                 }
             }
