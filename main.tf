@@ -3,9 +3,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.16"
-	  profiles = {
-		default = "default"
-	  }
     }
   }
 
