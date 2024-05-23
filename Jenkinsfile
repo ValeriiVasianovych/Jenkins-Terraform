@@ -22,7 +22,7 @@ pipeline {
             }
         }
 
-		stage('Terraform Init') {
+        stage('Terraform Init') {
             steps {
                 script {
                     sh 'pwd; ls -la'
@@ -65,14 +65,20 @@ pipeline {
                 }
             }
             steps {
-                sh 'terraform apply -input=false tfplan'
+                withCredentials([[
+                  $class: 'AmazonWebServicesCredentialsBinding',
+                  credentialsId: 'aws-credentials',
+                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                  sh 'terraform apply -input=false tfplan'
+                }
             }
         }
     }
-
-    // post {
-    //     always {
-    //         cleanWs()
-    //     }
-    // }
+    post {
+        always {
+            cleanWs()
+        }
+    }
 }
