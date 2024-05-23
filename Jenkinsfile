@@ -6,8 +6,7 @@ pipeline {
     }
 
     parameters {
-        booleanParam(name: 'autoDeploy', defaultValue: false, description: 'Automatically run terraform apply after plan?')
-        booleanParam(name: 'autoDestroy', defaultValue: false, description: 'Automatically run terraform destroy if needed?')
+        choice(name: 'ACTION', choices: ['Apply', 'Plan', 'Destroy'], description: 'Select action to perform with Terraform')
     }
 
     stages {
@@ -42,70 +41,47 @@ pipeline {
                 }
             }
         }
-
-        stage('Approve') {
+        
+        stage('User Input') {
             when {
-                not {
-                    equals expected: true, actual: params.autoDeploy
-                }
+                expression { params.ACTION != null }
             }
             steps {
                 script {
-                    def plan = readFile('tfplan.json')
-                    input message: 'Do you want to apply this plan?',
-                          parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+                    input message: 'Proceed with selected action?', parameters: [
+                        [$class: 'ChoiceParameterDefinition', choices: 'Yes\nNo', description: '', name: 'CONFIRM']
+                    ]
+                    if (params.CONFIRM == 'No') {
+                        error 'Pipeline aborted by user'
+                    }
                 }
             }
         }
-
-        stage('Apply') {
+        
+        stage('Terraform Action') {
             when {
-                allOf {
-                    anyOf {
-                        equals expected: true, actual: params.autoDeploy
-                        triggeredBy 'user'
-                    }
-                    not {
-                        equals expected: true, actual: params.autoDestroy
-                    }
-                }
+                expression { params.ACTION != null }
             }
             steps {
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: 'aws-credentials',
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                  sh 'terraform apply -input=false tfplan'
-                }
-            }
-        }
-
-        stage('Destroy') {
-            when {
-                allOf {
-                    anyOf {
-                        equals expected: true, actual: params.autoDestroy
-                        triggeredBy 'user'
+                script {
+                    switch (params.ACTION) {
+                        case 'Apply':
+                            sh 'terraform apply -auto-approve'
+                            break
+                        case 'Plan':
+                            sh 'terraform apply -auto-approve'
+                            break
+                        case 'Destroy':
+                            sh 'terraform destroy -auto-approve'
+                            break
+                        default:
+                            error "Invalid action selected: ${params.ACTION}"
                     }
-                    not {
-                        equals expected: true, actual: params.autoDeploy
-                    }
-                }
-            }
-            steps {
-                withCredentials([[
-                  $class: 'AmazonWebServicesCredentialsBinding',
-                  credentialsId: 'aws-credentials',
-                  accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                  secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                  sh 'terraform destroy -auto-approve'
                 }
             }
         }
     }
+    
     post {
         always {
             cleanWs()
