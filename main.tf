@@ -12,9 +12,7 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
-provider "aws" {
-  profile = "default"
-}
+provider "aws" {}
 
 data "aws_availability_zones" "available" {}
 data "aws_caller_identity" "current" {}
