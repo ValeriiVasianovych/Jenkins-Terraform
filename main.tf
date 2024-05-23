@@ -3,6 +3,9 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = "~> 4.16"
+	  profiles = {
+		default = "default"
+	  }
     }
   }
 
@@ -10,7 +13,7 @@ terraform {
 }
 
 provider "aws" {
-  region = "us-west-2"
+  profile = "default"
 }
 
 data "aws_availability_zones" "available" {}
