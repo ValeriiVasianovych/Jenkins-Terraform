@@ -37,26 +37,11 @@ pipeline {
 			}
 		}
 
-		stage('User Input') {
-			when {
-				expression { params.ACTION != null }
-			}
-			steps {
-				script {
-					input message: 'Proceed with selected action?', parameters: [
-						[$class: 'ChoiceParameterDefinition', choices: 'Yes\nNo', description: '', name: 'CONFIRM']
-					]
-					if (params.CONFIRM == 'No') {
-						error 'Pipeline aborted by user'
-					}
-				}
-			}
-		}
-
 		stage('Terraform Action') {
 			when {
 				expression { params.ACTION != null }
 			}
+			
 			steps {
 				script {
 					switch (params.ACTION) {
@@ -103,4 +88,4 @@ pipeline {
 			}
 		}
 	}
-}
+
