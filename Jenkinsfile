@@ -18,9 +18,10 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    sh 'pwd; cd terraform/; terraform init'
-                    sh 'pwd; cd terraform/; terraform plan -out tfplan'
-                    sh 'pwd; cd terraform/; terraform show tfplan > tfplan.txt'
+					sh 'ls -la'
+                    sh 'terraform init'
+                    sh 'terraform plan -out tfplan'
+                    sh 'terraform show tfplan > tfplan.txt'
                 }
             }
         }
