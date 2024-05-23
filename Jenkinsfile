@@ -25,7 +25,7 @@ pipeline {
         stage('Terraform Init') {
             steps {
                 script {
-                    sh 'ls -la'
+                    sh 'pwd; ls -la'
                     sh 'terraform init'
                     sh 'terraform plan -out=tfplan'
                     sh 'terraform show -json tfplan > tfplan.json'
