@@ -9,6 +9,7 @@ pipeline {
 		choice(name: 'ACTION', choices: ['Apply', 'Plan', 'Destroy'], description: 'Select action to perform with Terraform')
 	}
 
+	stages {
 		stage('Checkout GitHub Project') {
 			steps {
 				checkout scm
@@ -88,4 +89,4 @@ pipeline {
 			}
 		}
 	}
-
+}
